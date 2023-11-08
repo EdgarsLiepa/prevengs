@@ -48,8 +48,8 @@ The output plot shows the expression levels of different genes.
 
 ## Authors
 
-Edgars Liepa
-Ņikita Fomins
-Pauls Daugulis
-Agate Jarmakovica
-Aivija Stugle
+- Edgars Liepa
+- Ņikita Fomins
+- Pauls Daugulis
+- Agate Jarmakovica
+- Aivija Stugle
