@@ -3,6 +3,7 @@
 Pediatric oncogenomics data analysis pipeline for RTU Innovation Health Hub med tech development programm
 
 dependency list.
+
 - Python
     - Numpy
     - MatplotLib
@@ -10,6 +11,7 @@ dependency list.
     - Deseq2
 
 Input Faili:
+
 - Sample Counts
 - Reference Lengths
 
@@ -37,5 +39,17 @@ docker build -t prevengs .
 
 Run the docker image
 ```sh
-docker run -it --rm prevengs 'asd'
+docker run -it --rm prevengs '/Users/edgars/Projects/prevengs/data/RNS_FLT3_156.F.fastq.genome.htseq_counts.txt'
 ```
+
+This code processes transcriptome data and generates a plot of the results.
+The output plot shows the expression levels of different genes.
+![Transkriptoma_datu_plusma.jpg](doc/Transkriptoma_datu_plusma.jpg)
+
+## Authors
+
+Edgars Liepa
+Ņikita Fomins
+Pauls Daugulis
+Agate Jarmakovica
+Aivija Stugle
