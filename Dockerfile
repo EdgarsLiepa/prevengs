@@ -4,33 +4,41 @@ FROM python:3.9-slim
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
-# Install R and some dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     r-base \
     r-base-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the current directory contents into the container at /usr/src/app
-COPY src/ /usr/src/app
-
-# Install any needed Python packages by specifying requirements.txt
+# First, copy just the files defining dependencies.
+# It ensures that the Docker cache doesn't get invalidated unless dependencies change
 COPY requirements.txt .
+COPY install_packages.R .
+
+# Install any needed Python packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Install any needed R packages
-# You can automate the installation of R packages by listing them in a R script
-# Example install_packages.R content: 
-# install.packages(c("ggplot2", "dplyr"), repos = "https://cloud.r-project.org/")
-COPY install_packages.R ./
 RUN Rscript install_packages.R
 
+# Now copy the rest of your application's code.
+# This way, the earlier layers (dependencies) are cached and won't be rebuilt unless the requirements files change.
+# COPY src/ .
 
-# execute ls
-RUN ls -la
+# execute ls (Not usually needed in production Dockerfile, used here just for verifying contents)
+# Commenting out, as it's not typically needed for production images
+# RUN ls -la
 
-# Run Python script (make sure you have a script named `script.py` in your directory)
-COPY entrypoint.sh /usr/src/app/
+# Copy the entrypoint script into the container
+COPY entrypoint.sh .
+
+# Adjust file permissions to ensure the script is executable
+RUN chmod +x entrypoint.sh
+
+# Use the entrypoint script to run commands
+# Make sure to remove the comment to enable the ENTRYPOINT
 # ENTRYPOINT ["./entrypoint.sh"]
-# CMD ["python", "/src/script.py"]
 
-# If you also want to run an R script, you might need to modify the CMD to execute a shell script that runs both, or use multiple CMDs in an entrypoint script.
+# The CMD should provide default parameters for the ENTRYPOINT
+CMD ["bash"]
+
