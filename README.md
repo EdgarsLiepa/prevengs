@@ -1,6 +1,10 @@
-# prevengs
+# Prevengs
 
-Pediatric oncogenomics data analysis pipeline for RTU Innovation Health Hub med tech development programm
+Pediatric oncogenomics data analysis pipeline for RTU Innovation Health Hub med tech development program.
+
+THIS IS A DEVELOPMENT VERSION OF THE PIPELINE. IT IS NOT READY FOR PRODUCTION USE.
+
+## Description
 
 dependency list.
 
@@ -10,7 +14,7 @@ dependency list.
 	- R
     - Deseq2
 
-Input Faili:
+Input Files:
 
 - Sample Counts
 - Reference Lengths
@@ -31,20 +35,30 @@ add dependencies to python dependency list to requirements.txt
 
 add dependencies to R library install code to requirements.R which is executed while image is built.
 
-
 Build the docker image
+
 ```sh
 docker build -t prevengs .
 ```
 
-Run the docker image
+Run docker image with full pipeline
+
 ```sh
-docker run -it --rm prevengs '/Users/edgars/Projects/prevengs/data/RNS_FLT3_156.F.fastq.genome.htseq_counts.txt'
+TODO add command
+```
+
+
+Run the python script through the docker image.
+
+```sh
+docker run -v "$PWD":/usr/src/app -it --rm prevengs python src/script.py 'data/RNS_FLT3_156.F.fastq.genome.htseq_counts.txt'
 ```
 
 This code processes transcriptome data and generates a plot of the results.
 The output plot shows the expression levels of different genes.
 ![Transkriptoma_datu_plusma.jpg](doc/Transkriptoma_datu_plusma.jpg)
+
+## Nextflow
 
 ## Authors
 
