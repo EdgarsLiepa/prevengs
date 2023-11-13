@@ -1,4 +1,5 @@
 import sys
+import argparse
 
 # import libraries for plotting
 import numpy as np 
@@ -6,15 +7,25 @@ from statsmodels.graphics.gofplots import qqplot_2samples
 import scipy.stats
 import matplotlib.pyplot as plt
 
-print("Hello from script.py Print command line arguments")
-print(sys.argv)
-
 # print files in directory 
 import os
+
+print("files in directory: \n")
 print(os.listdir())
+
 
 # define function Load feature Counts
 def load_featureCounts(file_name):
+    """
+    Load gene count data from a featureCounts output file, starting from the 3rd line.
+    
+    Parameters:
+    file_name (str): The path to the featureCounts file.
+    
+    Returns:
+    dict: A dictionary of gene counts with gene names as keys and counts as values.
+    """
+    
     counts = {}
     with open(file_name, 'r') as f:
         # start from 3rd line
@@ -25,6 +36,7 @@ def load_featureCounts(file_name):
             counts[gene] = int(count)
     
     return counts
+
 
 # define function Load feature Counts HT-seq
 def load_featureCounts_htseq(file_name):
@@ -49,7 +61,12 @@ def load_geneLength(file_name):
 
     return lengths
 
+
 def calculateTPM(counts, lengths):
+
+    print("counts")
+    # print(counts)
+    print("lengths")
 
     # calculate read per kilobase
     RPK = {}
@@ -73,7 +90,7 @@ def calculateTPM(counts, lengths):
         tpm[gene] = RPK[gene] / scale * 1000000
 
     return tpm
-        
+
 
 def plot_counts(counts1, countsOld1, title1, title2):
     rez5 = qqplot_2samples(np.array(list(counts1.values())), np.array(list(countsOld1.values())), xlabel="New STAR", ylabel="Olds STAR")
@@ -88,6 +105,33 @@ def plot_counts(counts1, countsOld1, title1, title2):
 
     rez5.show()
 
+
+def calculate_gene_lengths_by_id(gtf_file_path):
+    """
+    Calculate the lengths of genes from a GTF file using gene_id as the unique identifier.
+
+    :param gtf_file_path: Path to the GTF file.
+    :return: A dictionary with gene_ids as keys and their lengths as values.
+    """
+    gene_lengths = {}
+
+    with open(gtf_file_path, 'r') as file:
+        for line in file:
+            if line.startswith('#'):  # Skip header lines
+                continue
+            fields = line.strip().split('\t')
+            if fields[2] == 'gene':  # We're only interested in lines describing genes
+                gene_info = fields[8]
+                gene_id = [info for info in gene_info.split(';') if 'gene_id' in info][0]
+                gene_id = gene_id.split('"')[1]
+
+                start_position = int(fields[3])
+                end_position = int(fields[4])
+                gene_length = end_position - start_position #+ 1  ?
+
+                gene_lengths[gene_id] = gene_length
+
+    return gene_lengths
 
 
 def plot_top_10_genes(tpm_dict1, tpm_dict2, title1, title2):
@@ -115,7 +159,84 @@ def plot_top_10_genes(tpm_dict1, tpm_dict2, title1, title2):
 
     plt.show()
 
-# Load featureCounts
-counts = load_featureCounts_htseq(sys.argv[1])
-print("counts")
-print(counts)
+
+def plot_top_10_tpms(tpm,filename):
+    """
+    Plot the top 10 TPMs
+
+    :param TPM: A dictionary with gene_ids as keys and their TPM as values.
+    """
+    # Sort the genes by length and get the top 10
+    top_10tpms = sorted(tpm.items(), key=lambda x: x[1], reverse=True)[:10]
+    gene_ids = [gene[0] for gene in top_10tpms]
+    tpm_value = [gene[1] for gene in top_10tpms]
+
+    # Plotting
+    plt.figure(figsize=(10, 8))
+    bars = plt.bar(gene_ids, tpm_value, color='skyblue')
+
+    # Adding the text on top of each bar
+    for bar in bars:
+        yval = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, yval + 0.5, f"{yval:.1f}", ha='center', va='bottom')
+
+    # Adding labels and title
+    plt.xlabel('Gene ID')
+    plt.ylabel('Transcripts per million')
+    plt.title('Top 10 TPM')
+    plt.xticks(rotation=45, ha='right')  # Rotate the gene ids for better readability
+    plt.tight_layout()
+    plt.savefig(filename, format='jpg', dpi=1000)
+
+    # Show the plot
+    plt.show()
+    plt.close()
+
+
+def main(args):
+    """
+    Main function to load counts, calculate TPM, and plot results.
+    """
+
+    print("Hello from main function")
+
+    print("args.counts_file")
+    print(args.counts_file)
+    print("args.gtf_file")
+    print(args.gtf_file)
+
+    # Load featureCounts
+    try:
+        counts = load_featureCounts_htseq(args.counts_file)
+        print("Counts loaded successfully.")
+    except Exception as e:
+        print(f"Error loading counts: {e}")
+        sys.exit(1)
+
+    # Calculate gene lengths
+    try:
+        gene_lengths = calculate_gene_lengths_by_id(args.gtf_file)
+        print("Gene lengths calculated successfully.")
+    except Exception as e:
+        print(f"Error calculating gene lengths: {e}")
+        sys.exit(1)
+
+    # Calculate TPM
+    tpm = calculateTPM(counts, gene_lengths)
+
+    # Plot the top 10 TPMs
+    print("Plotting top 10 TPMs")
+
+    plot_top_10_tpms(tpm, 'top_10_tpm.jpg')
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Process transcriptome featureCounts.")
+    
+    parser.add_argument("counts_file", help="The featureCounts file to process.")
+    parser.add_argument("gtf_file", help="The GTF file to use for gene length calculation.")
+    
+    args = parser.parse_args()
+    
+    main(args)
+    
