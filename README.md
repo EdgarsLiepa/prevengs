@@ -47,18 +47,31 @@ Run docker image with full pipeline
 TODO add command
 ```
 
-
 Run the python script through the docker image.
 
 ```sh
-docker run -v "$PWD":/usr/src/app -it --rm prevengs python src/script.py 'data/RNS_FLT3_156.F.fastq.genome.htseq_counts.txt'
+docker run -v "$PWD":/usr/src/app -it --rm prevengs python src/script.py 'data/RNS_FLT3_156.F.fastq.genome.htseq_counts.txt' 'data/gencode.v31.chr_patch_hapl_scaff.annotation.gtf'
 ```
+
+**$PWD** is the current working directory. It is mounted to the docker container as /usr/src/app
+
+Run docker container in interactive mode
+
+```sh
+docker run -v "$PWD":/usr/src/app -it --rm prevengs
+```
+
+
 
 This code processes transcriptome data and generates a plot of the results.
 The output plot shows the expression levels of different genes.
 ![Transkriptoma_datu_plusma.jpg](doc/Transkriptoma_datu_plusma.jpg)
 
 ## Nextflow
+
+## TODO
+
+- [ ] Add output parameters
 
 ## Authors
 

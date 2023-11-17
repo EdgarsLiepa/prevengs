@@ -46,6 +46,9 @@ parse_args <- function() {
   if (!file.exists(args[1])) {
     stop("The provided path does not exist")
   }
+  if (!file.info(args[1])$isdir) {
+    stop("The provided path is not a directory")
+  }
   return(normalizePath(args[1]))
 }
 

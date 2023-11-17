@@ -1,1 +1,1 @@
-install.packages(c("ggplot2", "dplyr"), repos = "https://cloud.r-project.org/")
+install.packages(c("dplyr","data.table", "factoextra", "funrar", "tidyverse"), repos = "https://cloud.r-project.org/")
