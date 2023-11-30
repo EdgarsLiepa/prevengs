@@ -15,10 +15,11 @@ library(data.table)
 library(ggplot2)
 library(reshape2)
 library(funrar)
-library(tidyverse)
-library(factoextra)
+# library(tidyverse)
+# library(factoextra)
 
 # Define a function to read in a file and return a data frame with a "Top5" column
+
 read_file <- function(file) {
   df <- read.table(file, header=TRUE, sep="\t")
   df[order(df$STDIN,decreasing=TRUE),] %>% 
@@ -28,7 +29,7 @@ read_file <- function(file) {
     summarize(SUM=sum(STDIN))
 }
 
-# Define a function to process a list of files and return a data frame with the results
+# Define a function to process a list of files and return a datagu frame with the results
 process_files <- function(files) {
   out <- rbindlist(lapply(files, read_file), fill = TRUE)
   names <- as.data.frame(as.data.frame(files)[rep(seq_len(nrow(as.data.frame(files))), each = 2), ])
@@ -65,10 +66,24 @@ main <- function() {
   input_dir <- args$input_dir
   output_file <- args$output_file
   
+  # if in input and output dir not provided quit
+  if (input_dir == "" || output_file == "") {
+    stop("Usage: Rscript top5_boxplot.R <input_directory> <output_file>")
+  }
+  
+
+  # print the arguments
+  print(paste("Input directory:", input_dir))
+  print(paste("Output file:", output_file))
+
+
   # Process the files and create the bar chart
-  files <- list.files(path=input_dir, pattern="*short", recursive=TRUE, full.names=TRUE)
+  files <- list.files(path=input_dir, pattern="*txt", recursive=TRUE, full.names=TRUE)
+  print(paste("Content of current directory:", files))
+
   matrix <- process_files(files)
-  create_bar_chart(matrix, output_file)
+  print(paste("Files: ", matrix))
+  # create_bar_chart(matrix, output_file)
 }
 
 # Call the main function
