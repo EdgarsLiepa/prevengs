@@ -1,3 +1,20 @@
+# 
+# RNA-seq pipeline Cancer gene outlier detection
+# from Htseq-counts data.
+#
+#   INPUT:
+#     -  Directory with RNA-seq Htseq-counts results files
+#   OUTPUT:
+#     - Boxplot of top 5 genes
+#     - PCA plot
+#     - Sample table
+#
+#   USAGE:
+#     Rscript top5_boxplot.R <input_directory> <output_folder>
+#
+
+
+
 library(dplyr)
 library(purrr)
 library(data.table)
@@ -46,6 +63,12 @@ box_plot <- lapply(read_htseq_files, testFunc) %>%
     scale_fill_manual(values = c("Top5" = "#7E22E5", "Not Top5" = "#FFFFFF"))
 
 C_Sycamore <- path %>%
+    print("File List", list.files(pattern="*counts",recursive = T, full.names = TRUE))
+    
+    # end program here
+    exit()
+    
+    
     list.files(pattern="*counts",recursive = T, full.names = TRUE) %>%
     set_names(tools::file_path_sans_ext(basename(.))) %>%
     lapply(fread) %>%
@@ -59,6 +82,9 @@ C_Sycamore <- path %>%
 res.pca <- prcomp(t(C_Sycamore)) %>%
     fviz_pca_ind(repel = TRUE, title = "PCA with all genes")
 
+
+# Save the sample table in the output folder
+write.csv(C_Sycamore, file = paste0(output_folder, "/sample_table.csv"))
 
 # Save the box_plot in output folder
 ggsave(paste0(output_folder, "/box_plot.jpg"), plot = box_plot, width = 10, height = 10, units = "in", dpi = 300)

@@ -12,7 +12,7 @@ parse_args <- function() {
   args <- commandArgs(trailingOnly = TRUE)
 
   if (length(args) != 2) {
-    stop("Usage: Rscript top5_boxplot.R <input_directory> <output_file>")
+    stop("Usage: Rscript PCA_for_all_genes.R <input_directory> <output_file>")
   }
 
   input_dir <- args[1]
