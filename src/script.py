@@ -10,9 +10,6 @@ import matplotlib.pyplot as plt
 # print files in directory 
 import os
 
-print("files in directory: \n")
-print(os.listdir())
-
 
 # define function Load feature Counts
 def load_featureCounts(file_name):
@@ -104,6 +101,8 @@ def plot_counts(counts1, countsOld1, title1, title2):
 
 
     rez5.show()
+    # save plot to file
+    plt.savefig('counts_qqplot.jpg', format='jpg', dpi=1000)   
 
 
 def calculate_gene_lengths_by_id(gtf_file_path):
@@ -158,6 +157,8 @@ def plot_top_10_genes(tpm_dict1, tpm_dict2, title1, title2):
     print(top_tpm_dict1)
 
     plt.show()
+    # save plot to file
+    plt.savefig('top_10_genes.jpg', format='jpg', dpi=1000)
 
 
 def plot_top_10_tpms(tpm,filename):
@@ -198,7 +199,6 @@ def main(args):
     Main function to load counts, calculate TPM, and plot results.
     """
 
-    print("Hello from main function")
 
     print("args.counts_file")
     print(args.counts_file)
@@ -221,13 +221,28 @@ def main(args):
         print(f"Error calculating gene lengths: {e}")
         sys.exit(1)
 
+
+    # get files in directory with .txt extension
+
+
+    # get sample name from file name
+    sample_name = os.path.basename(args.counts_file).split('.')[0]
+    
+    print(sample_name)
     # Calculate TPM
     tpm = calculateTPM(counts, gene_lengths)
 
     # Plot the top 10 TPMs
     print("Plotting top 10 TPMs")
+    plot_top_10_tpms(tpm, args.out_dir+"/"+sample_name+'_top_10_tpm.jpg')
 
-    plot_top_10_tpms(tpm, 'top_10_tpm.jpg')
+    # Save TPM to file
+    print("Saving TPM to file "+args.out_dir+"/"+sample_name+'_tpm.txt')
+    with open(args.out_dir+"/"+sample_name+'_tpm.txt', 'w') as f:
+        for gene in tpm:
+            f.write(f"{gene}\t{tpm[gene]}\n")
+    
+
 
 
 if __name__ == "__main__":
@@ -235,7 +250,8 @@ if __name__ == "__main__":
     
     parser.add_argument("counts_file", help="The featureCounts file to process.")
     parser.add_argument("gtf_file", help="The GTF file to use for gene length calculation.")
-    
+    parser.add_argument("out_dir", help="The directory to save the results in.")
+
     args = parser.parse_args()
     
     main(args)

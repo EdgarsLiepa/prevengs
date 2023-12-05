@@ -134,9 +134,6 @@ main <- function() {
     # Create data frame with feature counts
     sample_table <- create_sample_table(htseq_files)
 
-    # tpms <- calculate_tpms(htseq_files)
-
-
     # Create plots
     box_plot <- create_box_plot(htseq_files)
     pca_plot <- create_pca_plot(sample_table)
@@ -154,10 +151,6 @@ main <- function() {
     # Save the PCA in output folder
     ggsave(paste0(output_folder, "/pca.jpg"), plot = pca_plot, width = 10, height = 10, units = "in", dpi = 300)
     
-
-    # Calculate TPM values
-
-
     # Calculate log2FoldChange and p-values
 
 
@@ -170,6 +163,10 @@ main <- function() {
     for (i in 1:length(file_list)) {
         system(paste0("python3 src/script.py ", file_list[i], " ", reference_gene_annotation, " ", output_folder))
     }
+
+    tpms <- read_tpms(output_folder)
+    write.csv(sample_table, file = paste0(output_folder, "/tpms_combined.csv"))
+
 
 
 
