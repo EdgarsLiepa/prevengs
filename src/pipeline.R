@@ -101,7 +101,7 @@ combine_tpms <- function(path) {
 parse_args <- function() {
     args <- commandArgs(trailingOnly = TRUE)
 
-    if (length(args) != 2) {
+    if (length(args) != 3) {
         stop("Usage: Rscript top5_boxplot.R <path to input_directory with ht_seq_files> <path_to_reference_gene_annotation GTF file> <output_folder>")
     }
 
@@ -112,35 +112,47 @@ parse_args <- function() {
 }
 
 main <- function() {
+    
+
     args <- parse_args()
     path <- args$input_dir
     output_folder <- args$output_folder
     reference_gene_annotation <- args$reference_gene_annotation_path
     
+    # read htseq files to process
     htseq_files <- read_htseq_files(path)
-    box_plot <- create_box_plot(htseq_files)
+
+    # Create data frame with feature counts
     sample_table <- create_sample_table(path)
+
+
+    # Create plots
+    box_plot <- create_box_plot(htseq_files)
     pca_plot <- create_pca_plot(sample_table)
     
-    # make output folder id directory does not exist
+    # make output folder if directory does not exist
     if (!dir.exists(output_folder)) {
         dir.create(output_folder)
     }
-    
     # Save the sample table in the output folder
-    write.csv(sample_table, file = paste0(output_folder, "/sample_table.csv"))
+    write.csv(sample_table, file = paste0(output_folder, "/feature_table.csv"))
+    
     
     # Save the box_plot in output folder
     ggsave(paste0(output_folder, "/box_plot.jpg"), plot = box_plot, width = 10, height = 10, units = "in", dpi = 300)
-    
     # Save the PCA in output folder
     ggsave(paste0(output_folder, "/pca.jpg"), plot = pca_plot, width = 10, height = 10, units = "in", dpi = 300)
+    
 
+    # Calculate TPM values
+
+    # Calculate log2FoldChange and p-values
+
+    # Calculate Z-scores
 
     # run python script
+    
     file_list = list.files(pattern="*counts",recursive = T, full.names = TRUE)
-
-    # # for loop trhoug files in  file_list
     for (i in 1:length(file_list)) {
         system(paste0("python3 src/script.py ", file_list[i], " ", reference_gene_annotation, " ", output_folder))
     }
