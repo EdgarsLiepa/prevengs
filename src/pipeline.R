@@ -24,6 +24,27 @@ library(tidyverse)
 library(reticulate)
 
 
+#' Read HTSeq files from a given path
+#'
+#' This function reads HTSeq files from a specified path
+#' and filter ht-seq summary rows.
+#'
+#' @param path The path where the HTSeq files are located.
+#'
+#' @return A list of processed data frames.
+#'
+#' @examples
+#' read_htseq_files("/path/to/files")
+#'
+read_htseq_files  <- function(path) {
+    path %>% 
+        list.files(pattern="*counts", recursive = TRUE, full.names = TRUE) %>%
+        set_names(tools::file_path_sans_ext(basename(.)))%>%
+        lapply(fread) %>%
+        map(~ (.x %>% select(-V2)))%>%
+        map(~ (.x %>% filter(!V1 %in% c("__no_feature","__ambiguous","__too_low_aQual","__not_aligned","__alignment_not_unique"))))
+}
+
 process_ht_seq_table <- function(x){
     x[order(x$V3,decreasing=TRUE), ] %>% 
     data.frame(row.names = .[[1]]) %>%
@@ -32,14 +53,6 @@ process_ht_seq_table <- function(x){
     mutate(V1=as.character(factor(V1,levels=unique(V1)))) %>%
     group_by(V1) %>% 
     summarize(SUM=sum(V3))
-}
-
-read_htseq_files  <- function(path) {
-    path %>% 
-        list.files(pattern="*counts",recursive = T, full.names = TRUE) %>%
-        set_names(tools::file_path_sans_ext(basename(.)))%>%
-        lapply(fread) %>%
-        map(~ (.x %>% select(-V2)))
 }
 
 create_box_plot <- function(htseq_files) {
@@ -52,12 +65,8 @@ create_box_plot <- function(htseq_files) {
         scale_fill_manual(values = c("Top5" = "#7E22E5", "Not Top5" = "#FFFFFF"))
 }
 
-create_sample_table <- function(path) {
-    path %>%
-        list.files(pattern="*counts",recursive = T, full.names = TRUE) %>%
-        set_names(tools::file_path_sans_ext(basename(.))) %>%
-        lapply(fread) %>%
-        map(~ (.x %>% select(-V2))) %>%
+create_sample_table <- function(htseq_files) {
+    htseq_files %>%
         rbindlist(idcol = "Sample") %>%
         pivot_wider(names_from = Sample, values_from = "V3") %>%
         `row.names<-`(., NULL) %>% 
@@ -123,7 +132,9 @@ main <- function() {
     htseq_files <- read_htseq_files(path)
 
     # Create data frame with feature counts
-    sample_table <- create_sample_table(path)
+    sample_table <- create_sample_table(htseq_files)
+
+    # tpms <- calculate_tpms(htseq_files)
 
 
     # Create plots
@@ -146,12 +157,15 @@ main <- function() {
 
     # Calculate TPM values
 
+
     # Calculate log2FoldChange and p-values
+
 
     # Calculate Z-scores
 
+
     # run python script
-    
+
     file_list = list.files(pattern="*counts",recursive = T, full.names = TRUE)
     for (i in 1:length(file_list)) {
         system(paste0("python3 src/script.py ", file_list[i], " ", reference_gene_annotation, " ", output_folder))
