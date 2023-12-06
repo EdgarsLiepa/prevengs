@@ -19,9 +19,9 @@ library(dplyr)
 library(purrr)
 library(data.table)
 library(ggplot2)
-library(factoextra)
 library(tidyverse)
 library(reticulate)
+library(factoextra)
 
 
 #' Read HTSeq files from a given path
@@ -92,11 +92,28 @@ create_pca_plot <- function(transcript_count_table) {
 #' @examples
 #' combine_tpms("/path/to/tpm/files")
 combine_tpms <- function(path) {
-    path %>%
-        list.files(pattern="*tpm.txt",recursive = T, full.names = TRUE) %>%
+    tpmList <- path %>%
+        list.files(pattern="*tpm.txt", recursive = TRUE, full.names = TRUE) %>%
         set_names(tools::file_path_sans_ext(basename(.))) %>%
         lapply(fread) %>%
-        map(~ (.x %>% select(-V1)))
+        map(~ (.x %>% select(1,2)))
+
+    # add first sample to marged list 
+    merged_df <- tpmList[[1]] %>% rename(!!names(tpmList[1]) := V2)
+    
+    # Loop through the remaining data frames and merge
+    for (i in 2:length(tpmList)) {
+      
+      # get list to marge and set collumn name
+      df_to_merge <- tpmList[[i]] %>% rename(!!names(tpmList[i]) := V2)
+      
+      merged_df <- full_join(merged_df, df_to_merge, by = "V1")
+    }
+    
+    # Rename V1 collumn to GeneID
+    merged_df <- rename(merged_df, "GeneID" := V1)
+    
+    return(merged_df) 
 }
 
 #' parse_args function
@@ -151,12 +168,7 @@ main <- function() {
     # Save the PCA in output folder
     ggsave(paste0(output_folder, "/pca.jpg"), plot = pca_plot, width = 10, height = 10, units = "in", dpi = 300)
     
-    # Calculate log2FoldChange and p-values
-
-
-    # Calculate Z-scores
-
-
+ 
     # run python script
 
     file_list = list.files(pattern="*counts",recursive = T, full.names = TRUE)
@@ -164,11 +176,13 @@ main <- function() {
         system(paste0("python3 src/script.py ", file_list[i], " ", reference_gene_annotation, " ", output_folder))
     }
 
-    tpms <- read_tpms(output_folder)
-    write.csv(sample_table, file = paste0(output_folder, "/tpms_combined.csv"))
+    tpms <- combine_tpms (output_folder)
+    write.csv(tpms, file = paste0(output_folder, "/tpms_combined.csv", ))
+
+   # Calculate log2FoldChange and p-values
 
 
-
+    # Calculate Z-scores
 
 }
 
