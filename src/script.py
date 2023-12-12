@@ -40,8 +40,10 @@ def load_featureCounts_htseq(file_name):
     counts = {}
     with open(file_name, 'r') as f:
         for line in f:
-            description, gene, count = line.strip().split('\t')
-            counts[gene] = int(count)
+            gene, id, count = line.strip().split('\t')
+
+            if gene != '__no_feature' and gene != '__ambiguous' and gene != '__too_low_aQual' and gene != '__not_aligned' and gene != '__alignment_not_unique':
+                counts[gene] = int(count)
     
     return counts
 
@@ -60,10 +62,6 @@ def load_geneLength(file_name):
 
 
 def calculateTPM(counts, lengths):
-
-    print("counts")
-    # print(counts)
-    print("lengths")
 
     # calculate read per kilobase
     RPK = {}
@@ -121,7 +119,7 @@ def calculate_gene_lengths_by_id(gtf_file_path):
             fields = line.strip().split('\t')
             if fields[2] == 'gene':  # We're only interested in lines describing genes
                 gene_info = fields[8]
-                gene_id = [info for info in gene_info.split(';') if 'gene_id' in info][0]
+                gene_id = [info for info in gene_info.split(';') if 'gene_name' in info][0]
                 gene_id = gene_id.split('"')[1]
 
                 start_position = int(fields[3])
