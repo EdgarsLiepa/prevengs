@@ -1,4 +1,4 @@
-# 
+#
 # RNA-seq pipeline Cancer gene outlier detection
 # from Htseq-counts data.
 #
@@ -137,6 +137,39 @@ parse_args <- function() {
     return(list(input_dir=input_dir, output_folder=output_folder, reference_gene_annotation_path=reference_gene_annotation_path))
 }
 
+
+
+# input: tpm_df - data frame with combined TPM values
+# output: z_score_df - data frame with z-scores
+calculate_z_scores <- function(tpm_df) {
+
+    # Calculate mean value for collumns in tpm_df
+    # Leave for now if per sample mean and deviation is used
+
+    # mean_values <- apply(tpm_df[,-1], 2, mean)
+    # std <- apply(tpm_df[,-1], 2, sd)
+    
+    # Calculate mean and standard deviation for data frame with all samples.
+    
+    tpms_matrix <- as.matrix(tpm_df[,-1])
+    stDev <- sd(c(tpms_matrix))
+    mean <- mean(c(tpms_matrix))
+
+    # print(mean_values)
+    # print(std)
+
+    print("Calculating z-scores")
+    
+    # Calculate z-scores
+    z_score_df <- (tpm_df[,-1]-mean)/stDev
+
+    # # Add gene names back to the z-score data frame
+    rownames(z_score_df) <- tpm_df[,1]$GeneID
+
+    return(z_score_df)
+
+}
+
 main <- function() {
     
 
@@ -144,7 +177,7 @@ main <- function() {
     path <- args$input_dir
     output_folder <- args$output_folder
     reference_gene_annotation <- args$reference_gene_annotation_path
-    
+
     # read htseq files to process
     htseq_files <- read_htseq_files(path)
 
@@ -154,21 +187,20 @@ main <- function() {
     # Create plots
     box_plot <- create_box_plot(htseq_files)
     pca_plot <- create_pca_plot(sample_table)
-    
+
     # make output folder if directory does not exist
     if (!dir.exists(output_folder)) {
         dir.create(output_folder)
     }
     # Save the sample table in the output folder
     write.csv(sample_table, file = paste0(output_folder, "/feature_table.csv"))
-    
-    
+
     # Save the box_plot in output folder
     ggsave(paste0(output_folder, "/box_plot.jpg"), plot = box_plot, width = 10, height = 10, units = "in", dpi = 300)
     # Save the PCA in output folder
     ggsave(paste0(output_folder, "/pca.jpg"), plot = pca_plot, width = 10, height = 10, units = "in", dpi = 300)
-    
- 
+
+
     # run python script
 
     file_list = list.files(pattern="*counts",recursive = T, full.names = TRUE)
@@ -176,14 +208,15 @@ main <- function() {
         system(paste0("python3 src/script.py ", file_list[i], " ", reference_gene_annotation, " ", output_folder))
     }
 
-    tpms <- combine_tpms (output_folder)
-    write.csv(tpms, file = paste0(output_folder, "/tpms_combined.csv", ))
+    tpms <- combine_tpms(output_folder)
+    write.csv(tpms, file = paste0(output_folder, "/tpms_combined.csv"))
 
    # Calculate log2FoldChange and p-values
 
 
     # Calculate Z-scores
-
+    z_score <- calculate_z_scores(tpms)
+    write.csv(z_score, file = paste0("rez", "/z-scores.csv"))
 }
 
 main()
