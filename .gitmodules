@@ -1,0 +1,3 @@
+[submodule "util/outsingle-"]
+	path = util/outsingle-
+	url = https://github.com/esalkovic/outsingle.git

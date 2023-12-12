@@ -116,6 +116,38 @@ combine_tpms <- function(path) {
     return(merged_df) 
 }
 
+# input: tpm_df - data frame with combined TPM values
+# output: z_score_df - data frame with z-scores
+calculate_z_scores <- function(tpm_df) {
+  
+  # Calculate mean value for collumns in tpm_df
+  # Leave for now if per sample mean and deviation is used
+  
+  # mean_values <- apply(tpm_df[,-1], 2, mean)
+  # std <- apply(tpm_df[,-1], 2, sd)
+  
+  # Calculate mean and standard deviation for data frame with all samples.
+  
+  tpms_matrix <- as.matrix(tpm_df[,-1])
+  stDev <- sd(c(tpms_matrix))
+  mean <- mean(c(tpms_matrix))
+  
+  # print(mean_values)
+  # print(std)
+  
+  print("Calculating z-scores")
+  
+  # Calculate z-scores
+  z_score_df <- (tpm_df[,-1]-mean)/stDev
+  
+  # # Add gene names back to the z-score data frame
+  rownames(z_score_df) <- tpm_df[,1]$GeneID
+  
+  return(z_score_df)
+  
+}
+
+
 #' parse_args function
 #'
 #' This function parses command line arguments and returns a list
@@ -137,38 +169,6 @@ parse_args <- function() {
     return(list(input_dir=input_dir, output_folder=output_folder, reference_gene_annotation_path=reference_gene_annotation_path))
 }
 
-
-
-# input: tpm_df - data frame with combined TPM values
-# output: z_score_df - data frame with z-scores
-calculate_z_scores <- function(tpm_df) {
-
-    # Calculate mean value for collumns in tpm_df
-    # Leave for now if per sample mean and deviation is used
-
-    # mean_values <- apply(tpm_df[,-1], 2, mean)
-    # std <- apply(tpm_df[,-1], 2, sd)
-    
-    # Calculate mean and standard deviation for data frame with all samples.
-    
-    tpms_matrix <- as.matrix(tpm_df[,-1])
-    stDev <- sd(c(tpms_matrix))
-    mean <- mean(c(tpms_matrix))
-
-    # print(mean_values)
-    # print(std)
-
-    print("Calculating z-scores")
-    
-    # Calculate z-scores
-    z_score_df <- (tpm_df[,-1]-mean)/stDev
-
-    # # Add gene names back to the z-score data frame
-    rownames(z_score_df) <- tpm_df[,1]$GeneID
-
-    return(z_score_df)
-
-}
 
 main <- function() {
     
@@ -209,7 +209,7 @@ main <- function() {
     }
 
     tpms <- combine_tpms(output_folder)
-    write.csv(tpms, file = paste0(output_folder, "/tpms_combined.csv"))
+    write.csv(tpms, file = paste0(output_folder, "/tpms_combined.csv"), row.names = FALSE)
 
    # Calculate log2FoldChange and p-values
 
@@ -217,6 +217,19 @@ main <- function() {
     # Calculate Z-scores
     z_score <- calculate_z_scores(tpms)
     write.csv(z_score, file = paste0("rez", "/z-scores.csv"))
+
+    # Calculate log2FoldChange and p-values
+    # log2FoldChange <- calculate_log2FoldChange(tpms)
+    # write.csv(log2FoldChange, file = paste0("rez", "/log2FoldChange.csv"))
+
+    samples_db_path <- paste0(output_folder, "/tpms_combined.csv")
+    refSTjude_path <- reference_gene_annotation
+    gene_id_column <- "GeneID"
+    
+    tpm_log2foldchange_table <- function(samples_db_path, refSTjude_path, gene_id_column) {
+        system(paste0("python3 log2.fold.py ", samples_db_path, " ", refSTjude_path, " ", gene_id_column))
+    }
+
 }
 
 main()

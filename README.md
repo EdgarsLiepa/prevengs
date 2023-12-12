@@ -6,13 +6,9 @@ THIS IS A DEVELOPMENT VERSION OF THE PIPELINE. IT IS NOT READY FOR PRODUCTION US
 
 ## Description
 
-dependency list.
+dependencies list.
 
-- Python
-    - Numpy
-    - MatplotLib
-	- R
-    - Deseq2
+- Docker.
 
 Input Files:
 
@@ -37,7 +33,7 @@ add dependencies to R library install code to requirements.R which is executed w
 
 ### Build the docker image
 
-From prevengs project 
+From prevengs project.
 
 ```sh
 docker build -t prevengs .
@@ -50,7 +46,7 @@ Run the R pipeline script through the docker image.
 ```sh
 # Usage: Rscript pipeline.R <input_directory> <output_folder>
 
-docker run -v "$PWD":/usr/src/app -it --rm prevengs Rscript src/pipeline.R data/ ./
+docker run -v "$PWD":/usr/src/app -it --rm prevengs Rscript src/pipeline.R data/ data/gencode.v31.chr_patch_hapl_scaff.annotation.gtf ./rez
 ```
 
 Change **$PWD** to directory path with HTseqfiles and scripts. Local directory is mounted to the docker container at /usr/src/app.  
@@ -59,7 +55,6 @@ This needed to access the files from the docker container.
 Currently the pipeline script needs to mounted as well.
 
 ### Run the python script through the docker image  
-
 
 ```bash
 # Process transcriptome featureCounts.
@@ -102,11 +97,7 @@ This code processes transcriptome data and generates a plot of the results.
 The output plot shows the expression levels of different genes.
 ![Transkriptoma_datu_plusma.jpg](doc/Transkriptoma_datu_plusma.jpg)
 
-## Nextflow
-
 ## TODO
-
-- [ ] Add output parameters
 
 ## Authors
 

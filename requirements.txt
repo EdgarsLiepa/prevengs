@@ -2,3 +2,5 @@ numpy
 matplotlib
 statsmodels
 scipy
+pydeseq2
+pandas

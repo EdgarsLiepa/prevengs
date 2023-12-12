@@ -1,4 +1,3 @@
-
 # !pip install pydeseq2
 from pydeseq2.dds import DeseqDataSet
 from pydeseq2.ds import DeseqStats
@@ -16,6 +15,7 @@ def tpm_log2foldchange_table(samples_db_csv,refSTjude,geneId_col_name):
     # Set geneId as index
     samples_db = samples_db.set_index(geneId_col_name)
     ref_st_jude = ref_st_jude.set_index(geneId_col_name)
+
     # Merge the dataframes
     merged_tpm = pd.concat([samples_db, ref_st_jude], axis=1)
     # converting tpms to integers for deseq2
@@ -38,5 +38,9 @@ def tpm_log2foldchange_table(samples_db_csv,refSTjude,geneId_col_name):
     # res = stat_res.get_deseq_result()
     # results = stat_res.deseq_result
     # For now just return the DESq2 results that also contains log2FoldChange values
+
     return res
     # return merged_tpm, col_data,dds,res
+
+
+# results = tpm_log2foldchange_table("/rez/samples_db.csv", "/rez/refSTjude.csv", "GeneID")
