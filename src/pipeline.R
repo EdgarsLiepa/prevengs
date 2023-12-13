@@ -41,18 +41,18 @@ read_htseq_files  <- function(path) {
         list.files(pattern="*counts", recursive = TRUE, full.names = TRUE) %>%
         set_names(tools::file_path_sans_ext(basename(.)))%>%
         lapply(fread) %>%
-        map(~ (.x %>% select(-V2)))%>%
+        map(~ if(ncol(.x) == 3) select(.x, -V2) else .x) %>%
         map(~ (.x %>% filter(!V1 %in% c("__no_feature","__ambiguous","__too_low_aQual","__not_aligned","__alignment_not_unique"))))
 }
 
 process_ht_seq_table <- function(x){
-    x[order(x$V3,decreasing=TRUE), ] %>% 
+    x[order(x[[ncol(x)]], decreasing=TRUE), ] %>% 
     data.frame(row.names = .[[1]]) %>%
     .[!(row.names(.) %in% c("__no_feature","__ambiguous","__too_low_aQual","__not_aligned","__alignment_not_unique")),] %>% 
     mutate(V1=ifelse(V1 %in% head(V1,5),"Top5",'Not Top5'))%>% 
     mutate(V1=as.character(factor(V1,levels=unique(V1)))) %>%
     group_by(V1) %>% 
-    summarize(SUM=sum(V3))
+    summarize(SUM=sum(x[[ncol(x)]]))
 }
 
 create_box_plot <- function(htseq_files) {
@@ -68,7 +68,7 @@ create_box_plot <- function(htseq_files) {
 create_sample_table <- function(htseq_files) {
     htseq_files %>%
         rbindlist(idcol = "Sample") %>%
-        pivot_wider(names_from = Sample, values_from = "V3") %>%
+        pivot_wider(names_from = Sample, values_from = last_col()) %>%
         `row.names<-`(., NULL) %>% 
         column_to_rownames(var = "V1") %>%
         .[!(row.names(.) %in% c("__no_feature","__ambiguous","__too_low_aQual","__not_aligned","__alignment_not_unique")),]

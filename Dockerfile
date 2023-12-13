@@ -28,7 +28,7 @@ RUN pip install util/outpyr.zip
 COPY util/outsingle/requirements.txt util/outsingle/requirements.txt
 RUN pip install -r util/outsingle/requirements.txt
 RUN pip install scikit-learn 
-RUN pip install gene-outlier-detection
+# RUN pip install gene-outlier-detection
 
 
 # Install any needed R packages

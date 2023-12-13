@@ -40,7 +40,14 @@ def load_featureCounts_htseq(file_name):
     counts = {}
     with open(file_name, 'r') as f:
         for line in f:
-            gene, id, count = line.strip().split('\t')
+            columns = line.strip().split('\t')
+
+            if len(columns) == 3:
+                gene, id, count = columns
+            elif len(columns) == 2:
+                gene, count = columns
+            else:
+                continue
 
             if gene != '__no_feature' and gene != '__ambiguous' and gene != '__too_low_aQual' and gene != '__not_aligned' and gene != '__alignment_not_unique':
                 counts[gene] = int(count)
