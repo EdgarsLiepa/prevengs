@@ -4,7 +4,7 @@ FROM ghcr.io/rocker-org/r-ver:latest
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
-
+ENV SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
 
 # First, copy just the files defining dependencies.
 # It ensures that the Docker cache doesn't get invalidated unless dependencies change
@@ -22,13 +22,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 # install R package to run python
 RUN R -e "install.packages('reticulate')"
 
-COPY util/outpyr.zip util/
-RUN pip install util/outpyr.zip
+COPY util/outpyr util/outpyr
+RUN pip install util/outpyr
 
 COPY util/outsingle/requirements.txt util/outsingle/requirements.txt
+RUN pip install Cython
 RUN pip install -r util/outsingle/requirements.txt
 RUN pip install scikit-learn 
-RUN pip install gene-outlier-detection
+# RUN pip install gene-outlier-detection
 
 
 # Install any needed R packages

@@ -33,6 +33,9 @@ apt_install \
     libtiff5-dev \
     libjpeg-dev \
     unixodbc-dev \
+    libhdf5-serial-dev \
+    build-essential \
+    gcc \
     cmake
 
 install2.r --error --skipinstalled -n "$NCPUS" \

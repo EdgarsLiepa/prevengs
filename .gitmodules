@@ -1,3 +1,9 @@
 [submodule "util/outsingle-"]
 	path = util/outsingle-
 	url = https://github.com/esalkovic/outsingle.git
+[submodule "util/outpyr"]
+	path = util/outpyr
+	url = https://github.com/esalkovic/outpyr.git
+[submodule "util/outsingle"]
+	path = util/outsingle
+	url = https://github.com/esalkovic/outsingle.git
