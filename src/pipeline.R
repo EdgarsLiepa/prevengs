@@ -193,7 +193,8 @@ main <- function() {
         dir.create(output_folder)
     }
     # Save the sample table in the output folder
-    write.csv(sample_table, file = paste0(output_folder, "/feature_table.csv"))
+    print("SAve sample table in output folder /feature_table.csv")
+    write.table(sample_table, file = paste0(output_folder, "/feature_table.csv"), sep = "\t", quote = FALSE, row.names = FALSE)
 
     # Save the box_plot in output folder
     ggsave(paste0(output_folder, "/box_plot.jpg"), plot = box_plot, width = 10, height = 10, units = "in", dpi = 300)
@@ -226,9 +227,12 @@ main <- function() {
     refSTjude_path <- reference_gene_annotation
     gene_id_column <- "GeneID"
     
-    tpm_log2foldchange_table <- function(samples_db_path, refSTjude_path, gene_id_column) {
-        system(paste0("python3 log2.fold.py ", samples_db_path, " ", refSTjude_path, " ", gene_id_column))
-    }
+    print("Running python scripts outsingle/fast_zscore_estimation.py")
+    system(paste0("python3 util/outsingle/fast_zscore_estimation.py ", output_folder, "/feature_table.csv"))
+    
+    print("Running python scripts outsingle/optht_svd_zs.py")
+    system(paste0("python3 util/outsingle/optht_svd_zs.py ", output_folder, "/feature_table-fzse-zs.csv"))
+    
 
 }
 
