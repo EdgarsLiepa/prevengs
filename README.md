@@ -38,6 +38,9 @@ add dependencies to R library install code to requirements.R which is executed w
 From prevengs project.
 
 ```sh
+# Update repository submodules.
+git submodule update --init --recursive
+
 docker build -t prevengs .
 ```
 
