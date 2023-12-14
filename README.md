@@ -9,6 +9,8 @@ THIS IS A DEVELOPMENT VERSION OF THE PIPELINE. IT IS NOT READY FOR PRODUCTION US
 dependencies list.
 
 - Docker.
+- [outsingle](https://github.com/esalkovic/outsingle)
+- N-of-1 [gene_outlier_detection](https://github.com/jvivian/gene-outlier-detection)
 
 Input Files:
 
