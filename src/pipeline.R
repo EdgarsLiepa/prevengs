@@ -194,7 +194,7 @@ main <- function() {
     }
     # Save the sample table in the output folder
     print("SAve sample table in output folder /feature_table.csv")
-    write.table(sample_table, file = paste0(output_folder, "/feature_table.csv"), sep = "\t", quote = FALSE, row.names = FALSE)
+    write.table(sample_table, file = paste0(output_folder, "/feature_table.csv"), sep = "\t", quote = FALSE, row.names = TRUE)
 
     # Save the box_plot in output folder
     ggsave(paste0(output_folder, "/box_plot.jpg"), plot = box_plot, width = 10, height = 10, units = "in", dpi = 300)
