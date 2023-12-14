@@ -39,6 +39,13 @@ From prevengs project.
 docker build -t prevengs .
 ```
 
+### Get Human Release 31 (GRCh38.p12) reference gene anotations
+
+``` bash 
+wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_31/gencode.v31.basic.annotation.gtf.gz 
+```
+
+
 ### Run docker image with full pipeline
 
 Run the R pipeline script through the docker image.
