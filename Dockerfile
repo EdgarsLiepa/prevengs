@@ -10,6 +10,8 @@ ENV SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
 # It ensures that the Docker cache doesn't get invalidated unless dependencies change
 COPY install_tidyverse.sh .
 COPY requirements.txt .
+COPY util/outpyr util/outpyr
+COPY util/outsingle/requirements.txt util/outsingle/requirements.txt
 
 # Install any needed Python packages specified in requirements.txt
 RUN ./install_tidyverse.sh
@@ -20,12 +22,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 
 # install R package to run python
-RUN R -e "install.packages('reticulate')"
-
-COPY util/outpyr util/outpyr
 RUN pip install util/outpyr
-
-COPY util/outsingle/requirements.txt util/outsingle/requirements.txt
+RUN R -e "install.packages('reticulate')"
+RUN R -e "BiocManager::install(\"DESeq2\")"
 RUN pip install Cython
 RUN pip install -r util/outsingle/requirements.txt
 RUN pip install scikit-learn 

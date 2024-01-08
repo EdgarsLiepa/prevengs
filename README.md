@@ -1,4 +1,4 @@
-# Prevengs
+# PreveNGS
 
 Pediatric oncogenomics data analysis pipeline for RTU Innovation Health Hub med tech development program.
 
@@ -11,6 +11,7 @@ dependencies list.
 - Docker.
 - [outsingle](https://github.com/esalkovic/outsingle)
 - N-of-1 [gene_outlier_detection](https://github.com/jvivian/gene-outlier-detection)
+- Desq2 [DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)
 
 Input Files:
 
