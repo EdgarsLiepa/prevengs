@@ -12,11 +12,17 @@ dependencies list.
 - [outsingle](https://github.com/esalkovic/outsingle)
 - N-of-1 [gene_outlier_detection](https://github.com/jvivian/gene-outlier-detection)
 - Desq2 [DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)
+- testthat
 
 Input Files:
 
-- Sample Counts
+- HT-Seq Sample Counts - SampleName.htseq_counts.txt
+    - HT-Seq output file with counts for each gene.
+    - 2 collumns
+        - Gene ID
+        - Count
 - Reference Lengths
+- metadata file.
 
 Output:
 
@@ -47,12 +53,11 @@ docker build -t prevengs .
 
 ### Get Human Release 31 (GRCh38.p12) reference gene anotations
 
-``` bash 
+``` bash
 wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_31/gencode.v31.basic.annotation.gtf.gz 
 ```
 
-
-### Run docker image with full pipeline
+## Run with docker image
 
 Run the R pipeline script through the docker image.
 
@@ -82,6 +87,8 @@ Currently the pipeline script needs to mounted as well.
 docker run -v "$PWD":/usr/src/app -it --rm prevengs python3 src/script.py 'data/RNS_FLT3_156.F.fastq.genome.htseq_counts.txt' 'data/gencode.v31.chr_patch_hapl_scaff.annotation.gtf'
 ```
 
+## Differential expression analysis
+
 ### Run the R script through the docker image
 
 Run the R top5_boxplot script through the docker image.
@@ -109,6 +116,17 @@ docker run -v "$PWD":/usr/src/app -it --rm prevengs
 This code processes transcriptome data and generates a plot of the results.
 The output plot shows the expression levels of different genes.
 ![Transkriptoma_datu_plusma.jpg](doc/Transkriptoma_datu_plusma.jpg)
+
+## Run tests
+
+To run the tests, run the following command:
+
+```sh
+docker run -v "$PWD":/usr/src/app -it --rm prevengs Rscript tests/dge_test.R
+```
+
+the test that package is used to run the tests.
+
 
 ## TODO
 

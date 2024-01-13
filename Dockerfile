@@ -25,19 +25,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install util/outpyr
 RUN R -e "install.packages('reticulate')"
 RUN R -e "BiocManager::install(\"DESeq2\")"
+RUN R -e "install.packages('testthat', repos='http://cran.rstudio.com/')"
 RUN pip install Cython
 RUN pip install -r util/outsingle/requirements.txt
 RUN pip install scikit-learn 
 # RUN pip install gene-outlier-detection
 
-
 # Install any needed R packages
 # COPY install_packages.R .
 # RUN Rscript install_packages.R
-
-# Now copy the rest of your application's code.
-# This way, the earlier layers (dependencies) are cached and won't be rebuilt unless the requirements files change.
-# COPY src/ .
 
 # execute ls (Not usually needed in production Dockerfile, used here just for verifying contents)
 # Commenting out, as it's not typically needed for production images
