@@ -4,8 +4,6 @@ library(tidyverse)
 library(data.table)
 library(factoextra)
 
-# path <- "C:/Users/nikfo/OneDrive/Рабочий стол/IHH/new_new_samples//"
-
 # in one pipeline:
 
 parse_args <- function() {
@@ -42,8 +40,6 @@ column_to_rownames(var = "V1") %>%
 res.pca <- prcomp(t(C_Sycamore)) %>%
   fviz_pca_ind(repel = TRUE,     # Avoid text overlapping
               title = "PCA with all genes")
-
-print("suh!")
 
 # save file at ouptu
 pdf(output_file)

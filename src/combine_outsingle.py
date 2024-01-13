@@ -22,7 +22,7 @@ def combine_outsingle(file_zvalues, file_pvalues, output_file=False,gene_id_in_i
     return combined_df
 
 def main(args):
-    combine_outsingle(args.path_to_zvalues_file,args.path_to_pvalues_file)
+    combine_outsingle(args.path_to_zvalues_file,args.path_to_pvalues_file, output_file = True)
 
 
 if __name__ == "__main__":

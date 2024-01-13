@@ -23,7 +23,6 @@ library(tidyverse)
 library(reticulate)
 library(factoextra)
 
-
 #' Read HTSeq files from a given path
 #'
 #' This function reads HTSeq files from a specified path
@@ -55,6 +54,16 @@ process_ht_seq_table <- function(x){
     summarize(SUM=sum(x[[ncol(x)]]))
 }
 
+create_sample_table <- function(htseq_files) {
+    htseq_files %>%
+        rbindlist(idcol = "Sample") %>%
+        pivot_wider(names_from = Sample, values_from = last_col()) %>%
+        `row.names<-`(., NULL) %>% 
+        column_to_rownames(var = "V1") %>%
+        .[!(row.names(.) %in% c("__no_feature","__ambiguous","__too_low_aQual","__not_aligned","__alignment_not_unique")),]
+}
+
+# TODO change that already process tpm data frame is passed.
 create_box_plot <- function(htseq_files) {
     lapply(htseq_files, process_ht_seq_table) %>%
         rbindlist(idcol = "Reduced_name") %>%
@@ -65,18 +74,10 @@ create_box_plot <- function(htseq_files) {
         scale_fill_manual(values = c("Top5" = "#7E22E5", "Not Top5" = "#FFFFFF"))
 }
 
-create_sample_table <- function(htseq_files) {
-    htseq_files %>%
-        rbindlist(idcol = "Sample") %>%
-        pivot_wider(names_from = Sample, values_from = last_col()) %>%
-        `row.names<-`(., NULL) %>% 
-        column_to_rownames(var = "V1") %>%
-        .[!(row.names(.) %in% c("__no_feature","__ambiguous","__too_low_aQual","__not_aligned","__alignment_not_unique")),]
-}
-
 create_pca_plot <- function(transcript_count_table) {
     prcomp(t(transcript_count_table)) %>%
-        fviz_pca_ind(repel = TRUE, title = "PCA with all genes")
+        fviz_pca_ind(repel = TRUE, title = "PCA with all genes",
+        geom="point")
 }
 
 #' Combine TPM files into a single data frame
@@ -178,15 +179,13 @@ main <- function() {
     output_folder <- args$output_folder
     reference_gene_annotation <- args$reference_gene_annotation_path
 
-    # read htseq files to process
+    # read htseq files to create feature count combined table from all samples.
     htseq_files <- read_htseq_files(path)
-
-    # Create data frame with feature counts
     sample_table <- create_sample_table(htseq_files)
 
     # Create plots
-    box_plot <- create_box_plot(htseq_files)
-    pca_plot <- create_pca_plot(sample_table)
+    # box_plot <- create_box_plot(htseq_files)
+    # pca_plot <- create_pca_plot(sample_table)
 
     # make output folder if directory does not exist
     if (!dir.exists(output_folder)) {
@@ -196,44 +195,45 @@ main <- function() {
     print("SAve sample table in output folder /feature_table.csv")
     write.table(sample_table, file = paste0(output_folder, "/feature_table.csv"), sep = "\t", quote = FALSE, row.names = TRUE)
 
+
+    # Calculate log2FoldChange and p-values
+    # meta <- read.csv("data/BKUS_SAMPLES/metadata.tsv", sep="\t")
+    # log2FoldChange <- calculate_log2FoldChange(sample_table)
+    # write.csv(log2FoldChange, file = paste0("rez", "/log2FoldChange.csv"))
+
     # Save the box_plot in output folder
-    ggsave(paste0(output_folder, "/box_plot.jpg"), plot = box_plot, width = 10, height = 10, units = "in", dpi = 300)
+    # ggsave(paste0(output_folder, "/box_plot.jpg"), plot = box_plot, width = 10, height = 10, units = "in", dpi = 300)
     # Save the PCA in output folder
-    ggsave(paste0(output_folder, "/pca.jpg"), plot = pca_plot, width = 10, height = 10, units = "in", dpi = 300)
+    # ggsave(paste0(output_folder, "/pca.jpg"), plot = pca_plot, width = 10, height = 10, units = "in", dpi = 300)
 
 
     # run python script
 
-    file_list = list.files(pattern="*counts",recursive = T, full.names = TRUE)
-    for (i in 1:length(file_list)) {
-        system(paste0("python3 src/script.py ", file_list[i], " ", reference_gene_annotation, " ", output_folder))
-    }
+    # file_list = list.files(pattern="*counts",recursive = T, full.names = TRUE)
+    # for (i in 1:length(file_list)) {
+    #     system(paste0("python3 src/script.py ", file_list[i], " ", reference_gene_annotation, " ", output_folder))
+    # }
 
-    tpms <- combine_tpms(output_folder)
-    write.csv(tpms, file = paste0(output_folder, "/tpms_combined.csv"), row.names = FALSE)
+    # tpms <- combine_tpms(output_folder)
+    # write.csv(tpms, file = paste0(output_folder, "/tpms_combined.csv"), row.names = FALSE)
 
    # Calculate log2FoldChange and p-values
 
 
     # Calculate Z-scores
-    z_score <- calculate_z_scores(tpms)
-    write.csv(z_score, file = paste0("rez", "/z-scores.csv"))
+    # z_score <- calculate_z_scores(tpms)
+    # write.csv(z_score, file = paste0("rez", "/z-scores.csv"))
 
-    # Calculate log2FoldChange and p-values
-    # log2FoldChange <- calculate_log2FoldChange(tpms)
-    # write.csv(log2FoldChange, file = paste0("rez", "/log2FoldChange.csv"))
 
-    samples_db_path <- paste0(output_folder, "/tpms_combined.csv")
-    refSTjude_path <- reference_gene_annotation
-    gene_id_column <- "GeneID"
-    
     print("Running python scripts outsingle/fast_zscore_estimation.py")
     system(paste0("python3 util/outsingle/fast_zscore_estimation.py ", output_folder, "/feature_table.csv"))
-    
+
     print("Running python scripts outsingle/optht_svd_zs.py")
     system(paste0("python3 util/outsingle/optht_svd_zs.py ", output_folder, "/feature_table-fzse-zs.csv"))
-    
 
+    system(paste0("python3 src/combine_outsingle.py ", "/feature_table-fzse-zs.csv rez/feature_table-fzse-zs-pv.csv ", output_folder))
+
+    
 }
 
 main()
