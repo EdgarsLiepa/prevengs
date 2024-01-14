@@ -29,6 +29,7 @@ RUN R -e "install.packages('testthat', repos='http://cran.rstudio.com/')"
 RUN pip install Cython
 RUN pip install -r util/outsingle/requirements.txt
 RUN pip install scikit-learn 
+RUN R -e "install.packages(\"progress\")"
 # RUN pip install gene-outlier-detection
 
 # Install any needed R packages
