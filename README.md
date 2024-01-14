@@ -40,6 +40,13 @@ add dependencies to python dependency list to requirements.txt
 
 add dependencies to R library install code to requirements.R which is executed while image is built.
 
+## Download docker image from Docker Hub
+
+
+```sh
+ docker pull edgarsliepa/prevengs:latest
+```
+
 ### Build the docker image
 
 From prevengs project.
@@ -49,6 +56,12 @@ From prevengs project.
 git submodule update --init --recursive
 
 docker build -t prevengs .
+```
+
+corscompile docker image with buildx
+
+```sh 
+docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t <username>/<image>:latest --push .
 ```
 
 ### Get Human Release 31 (GRCh38.p12) reference gene anotations
@@ -88,6 +101,11 @@ docker run -v "$PWD":/usr/src/app -it --rm prevengs python3 src/script.py 'data/
 ```
 
 ## Differential expression analysis
+
+```sh
+docker run -v "$PWD":/usr/src/app -it --rm prevengs Rscript src/dge.R path/to/counts/file.tsv path/to/metadata/file.tsv
+```
+
 
 ### Run the R script through the docker image
 

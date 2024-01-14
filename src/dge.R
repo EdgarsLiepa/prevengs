@@ -1,6 +1,15 @@
-library(DESeq2)
+suppressPackageStartupMessages({
+  library(DESeq2, quietly = TRUE)
+})
 
-
+#' Normalize the counts in a DESeqDataSet object
+#'
+#' This function takes a DESeqDataSet object and normalizes the counts using the estimateSizeFactors function.
+#' It returns the normalized counts.
+#'
+#' @param dds A DESeqDataSet object containing raw counts.
+#' @return A matrix of normalized counts.
+#' @export
 normalize <- function(dds) {
 	dds <- estimateSizeFactors(dds)
 	normalized_counts <- counts(dds, normalized=TRUE)
@@ -10,11 +19,17 @@ normalize <- function(dds) {
 
 
 
-dge <- function(feature_table, metadata){
+# Function: dge
+# Description: Performs differential gene expression analysis using DESeq2 package.
+# Parameters:
+#   - feature_table: A matrix of count data representing gene expression levels.
+#   - metadata: A data frame containing sample metadata.
+# Returns: None
+dge <- function(feature_table, metadata, output_folder){
 
 	dds <- DESeqDataSetFromMatrix(countData = feature_table,
 								colData = metadata,
-								design = ~ condition)
+								design = ~ Type)
 
 	normalize(dds)
 
@@ -24,8 +39,10 @@ dge <- function(feature_table, metadata){
 	head(results(dds, tidy=TRUE))
 
 	# save results
-	write.csv(res, file = paste0("rez", "/DseqRes.csv"))
+	write.csv(res, file = paste0(output_folder, "/DseqRes.csv"))
+	print(paste("Results saved in output folder:", output_folder, "DseqRes.csv"))
 
+	# plot results
 	summary(res)
 }
 
@@ -76,7 +93,7 @@ parse_args <- function() {
 	args <- commandArgs(trailingOnly = TRUE)
 
 	if (length(args) != 3) {
-		stop("Usage: Rscript top5_boxplot.R <path to input_directory with ht_seq_files> <path_to_reference_gene_annotation GTF file> <output_folder>")
+		stop("Usage: Rscript dge.R <path to input_directory with ht_seq_files> <path_to_reference_gene_annotation GTF file> <output_folder>")
 	}
 
 	input_dir <- args[1]
@@ -88,13 +105,12 @@ parse_args <- function() {
 
 main <- function() {
 	
-
+	print("Running DGE analysis dge.R ...")
 	args <- parse_args()
 	feature_table_path <- args$input_dir
 	output_folder <- args$output_folder
 	metadata_path <- args$metadata_path
 	reference_gene_annotation <- args$reference_gene_annotation_path
-
 
 	dge()
 }
