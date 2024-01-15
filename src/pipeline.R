@@ -12,11 +12,16 @@
 #   USAGE:
 #     Rscript top5_boxplot.R <input_directory> <output_folder>
 #
+suppressPackageStartupMessages({
+library(dplyr)
+library(purrr)
+library(data.table)
+library(ggplot2)
+library(tidyverse)
+library(reticulate)
+library(factoextra)
+})
 
-# library(dplyr)
-# library(purrr)
-# library(data.table)
-# library(ggplot2)
 
 library(progress)
 
@@ -54,10 +59,12 @@ main <- function() {
 
     # parse command line arguments and assign to variables
     args <- parse_args()
-    path <- args$input_dir
     output_folder <- args$output_folder
+
+    path <- args$input_dir
     reference_gene_annotation <- args$reference_gene_annotation_path
     metadata <- args$metadata
+
 
     # print input arguments
     print(paste0("Input directory: ", path))
@@ -66,9 +73,15 @@ main <- function() {
     print(paste0("Metadata: ", metadata))
 
 
+
     # read htseq files to create feature count combined table from all samples.
     htseq_files <- read_htseq_files(path)
     sample_table <- create_sample_table(htseq_files)
+
+    # make output folder if directory does not exist
+    if (!dir.exists(output_folder)) {
+        dir.create(output_folder)
+    }
 
     # Create plots
     print("Creating box plot...")
@@ -76,10 +89,6 @@ main <- function() {
     print("Creating PCA plot...")
     create_pca_plot(sample_table, output_folder)
 
-    # make output folder if directory does not exist
-    if (!dir.exists(output_folder)) {
-        dir.create(output_folder)
-    }
 
     # Save the sample table in the output folder
     print("SAve sample table in output folder /feature_table.csv")
@@ -101,10 +110,10 @@ main <- function() {
     write.csv(tpms, file = paste0(output_folder, "/tpms_combined.csv"), row.names = FALSE)
 
 
-    # Calculate Z-scores
-    z_score <- calculate_z_scores(tpms)
-    write.csv(z_score, file = paste0(output_folder, "/z-scores.csv"))
-    print(paste0("Z-scores calculated and saved in ",output_folder,"/z-scores.csv"))
+    # # Calculate Z-scores
+    # z_score <- calculate_z_scores(tpms)
+    # write.csv(z_score, file = paste0(output_folder, "/z-scores.csv"))
+    # print(paste0("Z-scores calculated and saved in ",output_folder,"/z-scores.csv"))
 
 
     # DGE analysis

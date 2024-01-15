@@ -77,7 +77,7 @@ Run the R pipeline script through the docker image.
 ```sh
 # Usage: Rscript pipeline.R <input_directory> <output_folder>
 
-docker run -v "$PWD":/usr/src/app -it --rm prevengs Rscript src/pipeline.R data/ data/gencode.v31.chr_patch_hapl_scaff.annotation.gtf ./rez
+docker run -v "$PWD":/usr/src/app -it --rm prevengs Rscript src/pipeline.R data/BKUS_SAMPLES data/gencode.v31.chr_patch_hapl_scaff.annotation.gtf ./rez data/metadata_BKUS.tsv
 ```
 
 Change **$PWD** to directory path with HTseqfiles and scripts. Local directory is mounted to the docker container at /usr/src/app.  

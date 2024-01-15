@@ -119,23 +119,25 @@ combine_tpms <- function(path) {
     tpmList <- path %>%
         list.files(pattern="*tpm.txt", recursive = TRUE, full.names = TRUE) %>%
         set_names(tools::file_path_sans_ext(basename(.))) %>%
-        lapply(fread) %>%
-        map(~ (.x %>% select(1,2)))
+        lapply(function(file) {
+            df <- fread(file)
+            colnames(df)[2] <- basename(tools::file_path_sans_ext(file))
+            df
+        })
 
-    # add first sample to marged list 
-    merged_df <- tpmList[[1]] %>% rename(!!names(tpmList[1]) := V2)
-    
+    print("Combining TPM files into a single data frame")
+
+    # Initialize merged_df with the first data frame
+    merged_df <- tpmList[[1]]
+
+    print("Merging TPM files")
     # Loop through the remaining data frames and merge
     for (i in 2:length(tpmList)) {
-      
-      # get list to marge and set collumn name
-      df_to_merge <- tpmList[[i]] %>% rename(!!names(tpmList[i]) := V2)
-      
-      merged_df <- full_join(merged_df, df_to_merge, by = "V1")
+        merged_df <- full_join(merged_df, tpmList[[i]], by = "V1")
     }
     
-    # Rename V1 collumn to GeneID
-    merged_df <- rename(merged_df, "GeneID" := V1)
+    # Rename V1 column to GeneID
+    colnames(merged_df)[1] <- "GeneID"
     
     return(merged_df) 
 }

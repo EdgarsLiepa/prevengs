@@ -94,21 +94,6 @@ def calculateTPM(counts, lengths):
     return tpm
 
 
-def plot_counts(counts1, countsOld1, title1, title2):
-    rez5 = qqplot_2samples(np.array(list(counts1.values())), np.array(list(countsOld1.values())), xlabel="New STAR", ylabel="Olds STAR")
-
-    counts1_array = np.array(list(counts1.values()))
-    countsOld1_array = np.array(list(countsOld1.values()))
-    pearsonr = scipy.stats.pearsonr(counts1_array, countsOld1_array)[0]
-
-    # add legend with correlations in 3 rows 
-    rez5.axes[0].legend(['Pearsonr = ' + str(pearsonr)])
-
-
-    rez5.show()
-    # save plot to file
-    plt.savefig('counts_qqplot.jpg', format='jpg', dpi=1000)   
-
 
 def calculate_gene_lengths_by_id(gtf_file_path):
     """
@@ -137,33 +122,6 @@ def calculate_gene_lengths_by_id(gtf_file_path):
 
     return gene_lengths
 
-
-def plot_top_10_genes(tpm_dict1, tpm_dict2, title1, title2):
-    # sort by value
-    sorted_tpm_dict1 = sorted(tpm_dict1.items(), key=lambda kv: kv[1], reverse=True)
-    sorted_tpm_dict2 = sorted(tpm_dict2.items(), key=lambda kv: kv[1], reverse=True)
-
-    # get top 10
-    top_tpm_dict1 = sorted_tpm_dict1[:10]
-    top_tpm_dict2 = sorted_tpm_dict2[:10]
-
-    # print in bar plot where x is gene name and y is tpm
-
-    fig, axs = plt.subplots(1, 2, figsize=(10, 5))
-    axs[0].bar([x[0] for x in top_tpm_dict1], [x[1] for x in top_tpm_dict1], color='g')
-    axs[0].set_xticklabels([x[0] for x in top_tpm_dict1], rotation=90)
-    axs[0].set_title(title1)
-
-    axs[1].bar([x[0] for x in top_tpm_dict2], [x[1] for x in top_tpm_dict2], color='g')
-    axs[1].set_xticklabels([x[0] for x in top_tpm_dict2], rotation=90)
-    axs[1].set_title(title2)
-
-
-    print(top_tpm_dict1)
-
-    plt.show()
-    # save plot to file
-    plt.savefig('top_10_genes.jpg', format='jpg', dpi=1000)
 
 
 def plot_top_10_tpms(tpm,filename):
