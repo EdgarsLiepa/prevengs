@@ -1,3 +1,5 @@
+source("./src/input_processing.R")
+
 #' parse_args function
 #'
 #' This function parses command line arguments and returns a list
@@ -9,23 +11,28 @@
 parse_args <- function() {
     args <- commandArgs(trailingOnly = TRUE)
 
-    if (length(args) != 4) {
-        stop("Usage: Rscript create_reference_table.R <path to input_directory with ht_seq_files>")
+    if (length(args) != 2) {
+        stop("Usage: Rscript create_reference_table.R <path to input_directory with ht_seq_files> <output folder> \n
+              Input directory should contain htseq files for all samples. \n
+              Output folder will contain the feature table tsv, bar plot and PCA plot. \n")
     }
 
+    # TODO take files from folder or from pattern
     input_dir <- args[1]
+    output_folder <- args[2]
 
-    return(input_dir)
+    return(list(input_dir=input_dir, output_folder=output_folder))
 }
 
 
 
 main <- function()
 {
-
     args <- parse_args()
 
     ht_seq_dri_path <- args$input_dir
+    output_folder <- args$output_folder
+    
     # read htseq files to create feature count combined table from all samples.
     htseq_files <- read_htseq_files(ht_seq_dri_path)
     sample_table <- create_sample_table(htseq_files)
@@ -46,3 +53,6 @@ main <- function()
     print("SAve sample table in output folder /feature_table.csv")
     write.table(sample_table, file = paste0(output_folder, "/feature_table.csv"), sep = "\t", quote = FALSE, row.names = TRUE)
 }
+
+main()
+
