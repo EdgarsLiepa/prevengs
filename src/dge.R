@@ -29,7 +29,7 @@ dge <- function(feature_table, metadata, output_folder){
 
 	dds <- DESeqDataSetFromMatrix(countData = feature_table,
 								colData = metadata,
-								design = ~ Type)
+								design = ~ sample_type)
 
 	normalize(dds)
 

@@ -42,14 +42,14 @@ parse_args <- function() {
     args <- commandArgs(trailingOnly = TRUE)
 
     if (length(args) != 4) {
-        stop("Usage: Rscript top5_boxplot.R <path to input_directory with ht_seq_files> <path_to_reference_gene_annotation GTF file> <output_folder> <metadata_file>")
+        stop("Usage: Rscript pipeline.R <path to reference ht_seq_counts table> <path_to_reference_gene_annotation GTF file> <output_folder> <metadata_file>")
     }
 
-    input_dir <- args[1]
+    ht_seq_counts_table <- args[1]
     reference_gene_annotation_path <- args[2]
     output_folder <- args[3]
     metadata <- args[4]
-    return(list(input_dir=input_dir, output_folder=output_folder, reference_gene_annotation_path=reference_gene_annotation_path, metadata=metadata))
+    return(list(ht_seq_counts_table=ht_seq_counts_table, output_folder=output_folder, reference_gene_annotation_path=reference_gene_annotation_path, metadata=metadata))
 }
 
 
@@ -61,38 +61,16 @@ main <- function() {
     args <- parse_args()
     output_folder <- args$output_folder
 
-    path <- args$input_dir
+    ht_seq_counts_table_path <- args$ht_seq_counts_table
     reference_gene_annotation <- args$reference_gene_annotation_path
     metadata <- args$metadata
 
 
     # print input arguments
-    print(paste0("Input directory: ", path))
+    print(paste0("ht_seq_counts refrence table path: ", ht_seq_counts_table_path))
     print(paste0("Output folder: ", output_folder))
     print(paste0("Reference gene annotation: ", reference_gene_annotation))
     print(paste0("Metadata: ", metadata))
-
-
-
-    # read htseq files to create feature count combined table from all samples.
-    htseq_files <- read_htseq_files(path)
-    sample_table <- create_sample_table(htseq_files)
-
-    # make output folder if directory does not exist
-    if (!dir.exists(output_folder)) {
-        dir.create(output_folder)
-    }
-
-    # Create plots
-    print("Creating box plot...")
-    create_box_plot(htseq_files, output_folder)
-    print("Creating PCA plot...")
-    create_pca_plot(sample_table, output_folder)
-
-
-    # Save the sample table in the output folder
-    print("SAve sample table in output folder /feature_table.csv")
-    write.table(sample_table, file = paste0(output_folder, "/feature_table.csv"), sep = "\t", quote = FALSE, row.names = TRUE)
 
 
     # run python script
@@ -110,7 +88,7 @@ main <- function() {
     write.csv(tpms, file = paste0(output_folder, "/tpms_combined.csv"), row.names = FALSE)
 
 
-    # # Calculate Z-scores
+    # Calculate Z-scores TODO currently not used
     # z_score <- calculate_z_scores(tpms)
     # write.csv(z_score, file = paste0(output_folder, "/z-scores.csv"))
     # print(paste0("Z-scores calculated and saved in ",output_folder,"/z-scores.csv"))
@@ -121,18 +99,28 @@ main <- function() {
     # run dge.R   
     
     print(paste0("Reading ", metadata," ..."))
-    metadata <- tryCatch(
+    metadataTable <- tryCatch(
         {
-            read.csv(metadata, sep = "\t", header = TRUE, row.names = 1)
+            read.csv(metadata, sep = "\t", header = TRUE, row.names = "file_path")
         },
         error = function(e) {
             stop("Error reading metadata: ", conditionMessage(e))
         }
     )
     print("Metadata read successfully.")
-    
+
+    # If they don't match, you may need to transpose your feature_table
+    if (ncol(sample_table) != nrow(metadataTable)) {
+    sample_table <- t(sample_table)
+    }
+
+    # Check the dimensions of feature_table and metadata
+    print(dim(sample_table))
+    print(dim(metadataTable))
+    # print(head(sample_table))
+
     print("#\n#\n# Startting DGE analysis\n#\n#")
-    dge(sample_table, metadata, output_folder)
+    dge(sample_table, metadataTable, output_folder)
 
 
     #
@@ -154,7 +142,7 @@ main <- function() {
     print("Running python scripts outsingle/combine_outsingle.py")
     system(paste0("python3 src/combine_outsingle.py ", "/feature_table-fzse-zs.csv rez/feature_table-fzse-zs-pv.csv ", output_folder))
 
-    
+    # TODO Nof1
 }
 
 main()
