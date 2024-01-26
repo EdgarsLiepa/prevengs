@@ -40,34 +40,36 @@ add dependencies to python dependency list to requirements.txt
 
 add dependencies to R library install code to requirements.R which is executed while image is built.
 
-## Download docker image from Docker Hub
-
-
-```sh
- docker pull edgarsliepa/prevengs:latest
-```
-
-### Build the docker image
-
-From prevengs project.
-
 ```sh
 # Update repository submodules.
 git submodule update --init --recursive
-
-docker build -t prevengs .
 ```
 
-corscompile docker image with buildx
+### Download docker image from Docker Hub
 
-```sh 
-docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t <username>/<image>:latest --push .
+```sh
+ docker pull edgarsliepa/prevengs:latest
 ```
 
 ### Get Human Release 31 (GRCh38.p12) reference gene anotations
 
 ``` bash
 wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_31/gencode.v31.basic.annotation.gtf.gz 
+```
+
+## Build the docker image
+
+Docker image can be built from Docker file provided in the repository.
+From prevengs project.
+
+```sh
+docker build -t prevengs .
+```
+
+corscompile docker image with buildx
+
+```sh
+docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t <username>/<image>:latest --push .
 ```
 
 ## Run with docker image
@@ -145,8 +147,14 @@ docker run -v "$PWD":/usr/src/app -it --rm prevengs Rscript tests/dge_test.R
 
 the test that package is used to run the tests.
 
-
 ## TODO
+
+- [ ] Add exception when file in HT seq folder is not in right forma (create_reference_table.R)
+    - [ ] Define HT seq file format.
+    - [ ] BUG: breaks if htseq files are not named with *counts.txt
+    - [ ] Add maybe patern match for file
+- [ ] Fix Submodules.
+- [ ] Definēt kādu references genome tabulu izmantot.
 
 ## Authors
 
