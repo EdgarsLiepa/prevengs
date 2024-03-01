@@ -40,7 +40,11 @@ add dependencies to python dependency list to requirements.txt
 
 add dependencies to R library install code to requirements.R which is executed while image is built.
 
+clone this repository and update submodules
+
 ```sh
+git clone https://github.com/EdgarsLiepa/prevengs.git
+
 # Update repository submodules.
 git submodule update --init --recursive
 ```
@@ -48,13 +52,22 @@ git submodule update --init --recursive
 ### Download docker image from Docker Hub
 
 ```sh
- docker pull edgarsliepa/prevengs:latest
+docker pull edgarsliepa/prevengs:latest 
 ```
 
 ### Get Human Release 31 (GRCh38.p12) reference gene anotations
 
 ``` bash
 wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_31/gencode.v31.basic.annotation.gtf.gz 
+```
+
+### Run image from Docker Hub
+
+
+Example code to run Rscript using edgarsliepa/prevengs:latest image.
+
+``` bash
+docker run -v "$PWD":/usr/src/app edgarsliepa/prevengs:latest  Rscript src/pipeline.R data/BKUS_SAMPLES data/gencode.v31.chr_patch_hapl_scaff.annotation.gtf ./rez data/metadata_BKUS.tsv
 ```
 
 ## Build the docker image
@@ -72,7 +85,7 @@ corscompile docker image with buildx
 docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t <username>/<image>:latest --push .
 ```
 
-## Run with docker image
+### Run built docker image
 
 Run the R pipeline script through the docker image.
 

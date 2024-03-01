@@ -17,7 +17,7 @@ COPY util/outsingle/requirements.txt util/outsingle/requirements.txt
 RUN ./install_tidyverse.sh
 
 # install pip
-RUN apt-get update && apt-get install -y python3-pip
+RUN apt-get update && apt-get install -y python3-pip python3-tk
 RUN pip install --no-cache-dir -r requirements.txt
 
 
